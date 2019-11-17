@@ -11,6 +11,7 @@ namespace Dijkstra
             int start_vertex = 1; // вершина отсчета
 
             // матрица смежности
+
             int[,] matrix = new int[,] {{int.MaxValue, 7, 9, int.MaxValue, int.MaxValue, 14},
             {7, int.MaxValue, 10, 15, int.MaxValue, int.MaxValue},
             {9, 10, int.MaxValue, 11, int.MaxValue, 2},
@@ -27,43 +28,93 @@ namespace Dijkstra
             List<List<int>> path_on_vertices = new List<List<int>>();
 
             Algorithm(matrix, start_vertex, quantity_of_vertices, ref tags_of_vertices, ref num_tags_of_vertices, ref previous_vertices);
+            List_Filling(start_vertex, quantity_of_vertices, previous_vertices, ref path_on_vertices);
+            Line_List_Inversion(ref path_on_vertices, quantity_of_vertices);
+            Console_Output(quantity_of_vertices, path_on_vertices, num_tags_of_vertices, start_vertex);
 
-            Console_Output(start_vertex, quantity_of_vertices, num_tags_of_vertices, previous_vertices);
         }
 
         // вывод в консоль
-        public static void Console_Output(int start_vertex, int quantity_of_vertices, int[] num_tags_of_vertices, int[] previous_vertices)
+        private static void Console_Output(int quantity_of_vertices, List<List<int>> path_on_vertices, int[] num_tags_of_vertices, int start_vertex)
         {
-            Console.WriteLine($"Массив кратчайших путей от вершины {start_vertex} до всех остальных:");
-            Console.Write("(");
-            for (int i = 0; i < quantity_of_vertices; i++)
+            Console.WriteLine($"Вывод кратчайших путей от вершины {start_vertex} до всех остальных:");
+            for(int i = 1; i < quantity_of_vertices; i++)
             {
-                Console.Write(num_tags_of_vertices[i]);
-                Console.Write(" ");
+                Console.WriteLine($"Кратчайший путь от вершины {start_vertex} до вершины {i + 1} = {num_tags_of_vertices[i]}");
             }
-            Console.Write(")\n");
+            Console.WriteLine();
             Console.WriteLine("Вывод кратчайших путей по вершинам:");
-            for (int i = 0; i < quantity_of_vertices; i++)
+            for (int i = 1; i < quantity_of_vertices; i++)
             {
-                Console.Write(i + 1);
-                Console.Write(" <- ");
-                int j = previous_vertices[i];
-                while (j != start_vertex)
+                for (int j = 0; j < path_on_vertices[i].Count; j++)
                 {
-                    Console.Write(j);
-                    Console.Write(" <- ");
+                    if (j < path_on_vertices[i].Count - 1)
+                    {
+                        Console.Write($"{path_on_vertices[i][j]} ({num_tags_of_vertices[path_on_vertices[i][j + 1] - 1] - num_tags_of_vertices[path_on_vertices[i][j] - 1]})-> ");
+                    }
+                    else
+                    {
+                        Console.Write(path_on_vertices[i][j]);
+                    }
+
+                }
+                Console.WriteLine();
+            }
+        }
+
+        private static void Line_List_Inversion(ref List<List<int>> path_on_vertices, int quantity_of_vertices)
+        {
+            for(int i = 0; i < quantity_of_vertices; i++)
+            {
+                int j = 0;
+                int k = path_on_vertices[i].Count - 1;
+                int temp;
+                if(path_on_vertices[i].Count % 2 == 0)
+                {
+                    while (j != path_on_vertices[i].Count / 2)
+                    {
+                        temp = path_on_vertices[i][j];
+                        path_on_vertices[i][j] = path_on_vertices[i][k];
+                        path_on_vertices[i][k] = temp;
+                        j++;
+                        k--;
+                    }
+                }
+                else
+                {
+                    while (j != k)
+                    {
+                        temp = path_on_vertices[i][j];
+                        path_on_vertices[i][j] = path_on_vertices[i][k];
+                        path_on_vertices[i][k] = temp;
+                        j++;
+                        k--;
+                    }
+                }
+
+            }
+        }
+        private static void List_Filling(int start_vertex, int quantity_of_vertices, int[] previous_vertices, ref List<List<int>> path_on_vertices)
+        {
+            for(int i = 0; i < quantity_of_vertices; i++)
+            {
+                path_on_vertices.Add(new List<int>());
+                path_on_vertices[i].Add(i + 1);
+                int j = previous_vertices[i];
+                while(j != start_vertex)
+                {
+                    path_on_vertices[i].Add(j);
                     j = previous_vertices[j - 1];
                 }
 
-                if (j == start_vertex)
+                if(j == start_vertex)
                 {
-                    Console.Write(j);
-                    Console.WriteLine();
+                    path_on_vertices[i].Add(j);
                 }
             }
         }
 
-        public static void Algorithm(int[,] matrix, int start_vertex, int quantity_of_vertices,
+        private static void Algorithm(int[,] matrix, int start_vertex, int quantity_of_vertices,
         ref bool[] tags_of_vertices, ref int[] num_tags_of_vertices, ref int[] previous_vertices)
         {
             int reference_vertex; // индекс контрольной вершины
@@ -90,7 +141,7 @@ namespace Dijkstra
         }
 
         // найти вершину с минимальной меткой в массиве меток вершин
-        public static int Min_Tag(int[] num_tags_of_vertices, int quantity_of_vertices, bool[] tags_of_vertices)
+        private static int Min_Tag(int[] num_tags_of_vertices, int quantity_of_vertices, bool[] tags_of_vertices)
         {
             int temp = int.MaxValue;
             int temp_i = -1;
@@ -106,7 +157,7 @@ namespace Dijkstra
         }
 
         // найти смежные вершины с "контрольной" и пометить их
-        public static void Vertex_Processing (int quantity_of_vertices, int[,] matrix, int reference_vertex, 
+        private static void Vertex_Processing (int quantity_of_vertices, int[,] matrix, int reference_vertex, 
         ref int[] num_tags_of_vertices, ref bool[] tags_of_vertices, ref int[] previous_vertices)
         {
             for (int i = 0; i < quantity_of_vertices; i++)
@@ -125,7 +176,7 @@ namespace Dijkstra
         }
 
         // проверить на начало алгоритма
-        public static bool Start_Check(ref bool[] tags_of_vertices, int quantity_of_vertices)
+        private static bool Start_Check(ref bool[] tags_of_vertices, int quantity_of_vertices)
         {
             for (int i = 0; i < quantity_of_vertices; i++)
             {
@@ -138,7 +189,7 @@ namespace Dijkstra
         }
 
         // проверить на конец алгоритма
-        public static bool End_Check(ref bool[] tags_of_vertices, int quantity_of_vertices)
+        private static bool End_Check(ref bool[] tags_of_vertices, int quantity_of_vertices)
         {
             for (int i = 0; i < quantity_of_vertices; i++)
             {
