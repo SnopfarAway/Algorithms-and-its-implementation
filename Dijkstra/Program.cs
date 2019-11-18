@@ -16,7 +16,7 @@ namespace Dijkstra
             {14, int.MaxValue, 2, int.MaxValue, 9, int.MaxValue}};
 
             int quantity_of_vertices = matrix.GetLength(1); // количество вершин
-            int start_vertex = 6; // вершина отсчета
+            int start_vertex = 1; // вершина отсчета
 
             int[] num_tags_of_vertices = new int[quantity_of_vertices]; // нумерованные метки вершин
 
@@ -32,8 +32,8 @@ namespace Dijkstra
                 return -1;
             }
             List_Filling(start_vertex, quantity_of_vertices, previous_vertices, ref path_on_vertices);
-            Line_List_Inversion(ref path_on_vertices, quantity_of_vertices);
             Console_Output(quantity_of_vertices, path_on_vertices, num_tags_of_vertices, start_vertex);
+
             return 0;
         }
 
@@ -54,11 +54,12 @@ namespace Dijkstra
             {
                 if(i + 1 != start_vertex)
                 {
-                    for (int j = 0; j < path_on_vertices[i].Count; j++)
+                    for (int j = path_on_vertices[i].Count - 1; j >= 0; j--)
                     {
-                        if (j < path_on_vertices[i].Count - 1)
+                        if (j > 0)
                         {
-                            Console.Write($"{path_on_vertices[i][j]} ({num_tags_of_vertices[path_on_vertices[i][j + 1] - 1] - num_tags_of_vertices[path_on_vertices[i][j] - 1]})-> ");
+                            Console.Write(path_on_vertices[i][j] +
+                            $" ({num_tags_of_vertices[path_on_vertices[i][j - 1] - 1] - num_tags_of_vertices[path_on_vertices[i][j] - 1]})-> ");
                         }
                         else
                         {
@@ -71,39 +72,7 @@ namespace Dijkstra
             }
         }
 
-        // инверсия строк в листе путей по вершинам
-        private static void Line_List_Inversion(ref List<List<int>> path_on_vertices, int quantity_of_vertices)
-        {
-            for(int i = 0; i < quantity_of_vertices; i++)
-            {
-                int j = 0;
-                int k = path_on_vertices[i].Count - 1;
-                int temp;
-                if(path_on_vertices[i].Count % 2 == 0)
-                {
-                    while (j != path_on_vertices[i].Count / 2)
-                    {
-                        temp = path_on_vertices[i][j];
-                        path_on_vertices[i][j] = path_on_vertices[i][k];
-                        path_on_vertices[i][k] = temp;
-                        j++;
-                        k--;
-                    }
-                }
-                else
-                {
-                    while (j != k)
-                    {
-                        temp = path_on_vertices[i][j];
-                        path_on_vertices[i][j] = path_on_vertices[i][k];
-                        path_on_vertices[i][k] = temp;
-                        j++;
-                        k--;
-                    }
-                }
-
-            }
-        }
+        // запись кратчайших путей по вершинам в двумерный лист
         private static void List_Filling(int start_vertex, int quantity_of_vertices, int[] previous_vertices, ref List<List<int>> path_on_vertices)
         {
             for(int i = 0; i < quantity_of_vertices; i++)
