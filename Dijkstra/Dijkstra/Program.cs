@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Dijkstra
 {
@@ -33,8 +34,55 @@ namespace Dijkstra
             }
             List_Filling(start_vertex, quantity_of_vertices, previous_vertices, ref path_on_vertices);
             Console_Output(quantity_of_vertices, path_on_vertices, num_tags_of_vertices, start_vertex);
+            File_Output(quantity_of_vertices, path_on_vertices, num_tags_of_vertices, start_vertex);
 
             return 0;
+        }
+
+        // вывод в файл
+        private static void File_Output(int quantity_of_vertices, List<List<int>> path_on_vertices, int[] num_tags_of_vertices, int start_vertex)
+        {
+            string path = @"C:\Artem\source\C_Console_apps\Algorithms-and-its-implementation\Dijkstra\myfile.txt";
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default))
+                {
+                    sw.WriteLine($"Вывод кратчайших путей от вершины {start_vertex} до всех остальных:");
+                    for (int i = 0; i < quantity_of_vertices; i++)
+                    {
+                        if (i + 1 != start_vertex)
+                        {
+                            sw.WriteLine($"Кратчайший путь от вершины {start_vertex} до вершины {i + 1} = {num_tags_of_vertices[i]}");
+                        }
+                    }
+                    sw.WriteLine();
+                    sw.WriteLine("Вывод кратчайших путей по вершинам:");
+                    for (int i = 0; i < quantity_of_vertices; i++)
+                    {
+                        if (i + 1 != start_vertex)
+                        {
+                            for (int j = path_on_vertices[i].Count - 1; j >= 0; j--)
+                            {
+                                if (j > 0)
+                                {
+                                    sw.Write(path_on_vertices[i][j] +
+                                    $" ({num_tags_of_vertices[path_on_vertices[i][j - 1] - 1] - num_tags_of_vertices[path_on_vertices[i][j] - 1]})-> ");
+                                }
+                                else
+                                {
+                                    sw.Write(path_on_vertices[i][j]);
+                                }
+
+                            }
+                            sw.WriteLine();
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         // вывод в консоль
